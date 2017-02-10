@@ -15,6 +15,9 @@ public class WordCounter extends BaseRichBolt {
 	String name;
 	Map<String, Integer> counters;
 	private OutputCollector collector;
+	int i=0;
+	int refreshCachenum=0;
+	int wordnum=0;
 
 	/**
 	 * At the end of the spout (when the cluster is shutdown
@@ -22,6 +25,9 @@ public class WordCounter extends BaseRichBolt {
 	 */
 	@Override
 	public void cleanup() {
+		System.out.println(i);
+		System.out.println("refreshCachenum"+refreshCachenum);
+		System.out.println("wordnum"+wordnum);
 		System.out.println("-- Word Counter ["+name+"-"+id+"] --");
 		for(Map.Entry<String, Integer> entry : counters.entrySet()){
 			System.out.println(entry.getKey()+": "+entry.getValue());
@@ -33,18 +39,20 @@ public class WordCounter extends BaseRichBolt {
 	 */
 	@Override
 	public void execute(Tuple input) {
+			i++;
 			String str = null; 
 			try{
 				str = input.getStringByField("word");
 			}catch (IllegalArgumentException e) {
 				//Do nothing
 			}
-			
+			System.out.println("str="+str);
 			if(str!=null){
 				/**
 				 * If the word dosn't exist in the map we will create
 				 * this, if not We will add 1 
 				 */
+				wordnum++;
 				if(!counters.containsKey(str)){
 					counters.put(str, 1);
 				}else{
@@ -52,6 +60,8 @@ public class WordCounter extends BaseRichBolt {
 					counters.put(str, c);
 				}
 			}else{
+				refreshCachenum++;
+				System.out.println("laile");
 				if(input.getSourceStreamId().equals("signals")){
 					str = input.getStringByField("action");
 					if("refreshCache".equals(str))

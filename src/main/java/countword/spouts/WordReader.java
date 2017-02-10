@@ -12,6 +12,9 @@ import backtype.storm.topology.base.BaseRichSpout;
 import backtype.storm.tuple.Fields;
 import backtype.storm.tuple.Values;
 
+/**
+ * µ¥ÊµÀý
+ */
 public class WordReader extends BaseRichSpout {
 
 	private SpoutOutputCollector collector;
@@ -26,7 +29,7 @@ public class WordReader extends BaseRichSpout {
 	public void fail(Object msgId) {
 		System.out.println("FAIL:"+msgId);
 	}
-
+	int i=0;
 	/**
 	 * The only thing that the methods will do It is emit each 
 	 * file line
@@ -36,12 +39,14 @@ public class WordReader extends BaseRichSpout {
 		 * The nextuple it is called forever, so if we have been readed the file
 		 * we will wait and then return
 		 */
+		System.out.println("WordReader nextTuple num="+(++i)+completed);
 		if(completed){
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				//Do nothing
 			}
+			System.out.println("WordReader nextTuple end.");
 			return;
 		}
 		String str;
@@ -71,7 +76,7 @@ public class WordReader extends BaseRichSpout {
 			this.context = context;
 			this.fileReader = new FileReader(conf.get("wordsFile").toString());
 		} catch (FileNotFoundException e) {
-			throw new RuntimeException("Error reading file ["+conf.get("wordFile")+"]");
+			throw new RuntimeException("Error reading file ["+conf.get("wordsFile")+"]");
 		}
 		this.collector = collector;
 	}

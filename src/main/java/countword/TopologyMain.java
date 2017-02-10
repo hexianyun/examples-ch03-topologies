@@ -1,13 +1,13 @@
 package countword;
 
-import countword.spouts.SignalsSpout;
-import countword.spouts.WordReader;
-import countword.bolts.WordCounter;
-import countword.bolts.WordNormalizer;
 import backtype.storm.Config;
 import backtype.storm.LocalCluster;
 import backtype.storm.topology.TopologyBuilder;
 import backtype.storm.tuple.Fields;
+import countword.bolts.WordCounter;
+import countword.bolts.WordNormalizer;
+import countword.spouts.SignalsSpout;
+import countword.spouts.WordReader;
 
 
 public class TopologyMain {
@@ -20,8 +20,8 @@ public class TopologyMain {
 		builder.setBolt("word-normalizer", new WordNormalizer())
 			.shuffleGrouping("word-reader");
 		
-		builder.setBolt("word-counter", new WordCounter(),2)
-			.fieldsGrouping("word-normalizer",new Fields("word"))
+		builder.setBolt("word-counter", new WordCounter(), 2)
+			.fieldsGrouping("word-normalizer", new Fields("word"))
 			.allGrouping("signals-spout","signals");
 
 		
@@ -33,7 +33,8 @@ public class TopologyMain {
 		conf.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
 		LocalCluster cluster = new LocalCluster();
 		cluster.submitTopology("Count-Word-Toplogy-With-Refresh-Cache", conf, builder.createTopology());
-		Thread.sleep(5000);
+		Thread.sleep(10000);
+		//控制spout nextTuple循环终止（一个topology会一直运行直到你手动kill掉）
 		cluster.shutdown();
 	}
 }
