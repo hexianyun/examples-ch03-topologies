@@ -1,5 +1,6 @@
 package countword.bolts;
 
+import java.util.List;
 import java.util.Map;
 
 import backtype.storm.task.OutputCollector;
@@ -13,7 +14,7 @@ import backtype.storm.tuple.Values;
 public class WordNormalizer extends BaseRichBolt {
 
 	private OutputCollector collector;
-	int numCounterTasks=0;
+	List<Integer> counterTasks;
 	public void cleanup() {}
 
 	/**
@@ -30,16 +31,26 @@ public class WordNormalizer extends BaseRichBolt {
             word = word.trim();
             if(!word.isEmpty()){
                 word = word.toLowerCase();
-                collector.emit(new Values(word));
+//                collector.emit(new Values(word));
+				collector.emitDirect(getWordCountTaskId(word),new Values(word));
             }
         }
         // Acknowledge the tuple
         collector.ack(input);
     }
+
+	private Integer getWordCountTaskId(String word) {
+		word = word.trim().toUpperCase();
+		if(word.isEmpty()){
+			return counterTasks.get(0);
+		}else{
+			return counterTasks.get(word.charAt(0) % counterTasks.size());
+		}
+	}
 	public void prepare(Map stormConf, TopologyContext context,
 			OutputCollector collector) {
 		this.collector = collector;
-		this.numCounterTasks = context.getComponentTasks("word-counter").size();
+		this.counterTasks = context.getComponentTasks("word-counter");
 	}
 
 	/**

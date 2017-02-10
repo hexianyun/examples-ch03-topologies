@@ -21,8 +21,9 @@ public class TopologyMain {
 			.shuffleGrouping("word-reader");
 		
 		builder.setBolt("word-counter", new WordCounter(), 2)
-			.fieldsGrouping("word-normalizer", new Fields("word"))
-			.allGrouping("signals-spout","signals");
+//			.fieldsGrouping("word-normalizer", new Fields("word"));
+//			.allGrouping("signals-spout","signals");
+		.directGrouping("word-normalizer");
 
 		
         //Configuration
@@ -33,7 +34,11 @@ public class TopologyMain {
 		conf.put(Config.TOPOLOGY_MAX_SPOUT_PENDING, 1);
 		LocalCluster cluster = new LocalCluster();
 		cluster.submitTopology("Count-Word-Toplogy-With-Refresh-Cache", conf, builder.createTopology());
-		Thread.sleep(10000);
+		Thread.sleep(1000);
+
+		//解决java.io.IOException: Unable to delete file: C:\Users\Mtime\AppData\Local\Temp\5ac71c52-fc17-4b2d-956f-7bb60fb5091a\version-2\log.1
+//		cluster.killTopology("Count-Word-Toplogy-With-Refresh-Cache");但是没用
+
 		//控制spout nextTuple循环终止（一个topology会一直运行直到你手动kill掉）
 		cluster.shutdown();
 	}
